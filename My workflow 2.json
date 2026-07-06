@@ -1,0 +1,237 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 14,
+              "triggerAtHour": 9
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -800,
+        -80
+      ],
+      "id": "ce10b19b-a294-4b5e-88e0-6c3d034009a7",
+      "name": "Dispara no dia 14/07/26 às 9Am"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1Jfq045ib9lx0G8A4eUroOjNc45gBJr6DR_lvZftD3-I",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Candidatos",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -624,
+        -80
+      ],
+      "id": "935074cd-84bb-4f72-9e37-87f01ce5e47d",
+      "name": "Obtém Candidatos",
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "n2zT0etOp09WXTRn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d197dca3-dcc3-4143-9070-49a06f3eb915",
+              "leftValue": "={{ $json['Anos Experiência'] }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "7ec735e4-9694-4a2b-9270-199ba3e94536",
+              "leftValue": "={{ $json['Grau Escolaridade'] }}",
+              "rightValue": "Superior",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        -80
+      ],
+      "id": "96461724-28c6-4ddd-83c0-6e5f0cb62846",
+      "name": "Candidato Aprovado?"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -192,
+        -128
+      ],
+      "id": "241b4c60-9973-493e-9ac1-85ba699a4a17",
+      "name": "Para Cada Candidato"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Autotic <contato@autotic.com.br>",
+        "toEmail": "={{ $json['E-mail'] }}",
+        "subject": "Você foi aprovado!!",
+        "emailFormat": "text",
+        "text": "=Olá {{ $json.Nome.split(' ')[0] }}, tudo bem?\nPassando aqui para informar que você foi aprovado para a próxima fase do processo seletivo.\n\nParabéns!!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        -48
+      ],
+      "id": "c8ca9e44-f47b-409d-9cc4-dd0b6286cb8f",
+      "name": "Envia email de aprovação",
+      "webhookId": "35d55c5d-6fbc-483b-bc90-1ed516346c4d",
+      "credentials": {
+        "smtp": {
+          "id": "Vsj2HzuQY1DFm7Gh",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        -48
+      ],
+      "id": "c5fed047-64c2-4260-a534-768cc87ad0d7",
+      "name": "Aguardar 5s",
+      "webhookId": "a47512fb-fc42-4b55-9213-73b73c9a8a78"
+    }
+  ],
+  "pinData": {
+    "Dispara no dia 14/07/26 às 9Am": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Dispara no dia 14/07/26 às 9Am": {
+      "main": [
+        [
+          {
+            "node": "Obtém Candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtém Candidatos": {
+      "main": [
+        [
+          {
+            "node": "Candidato Aprovado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidato Aprovado?": {
+      "main": [
+        [
+          {
+            "node": "Para Cada Candidato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Para Cada Candidato": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Envia email de aprovação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 5s": {
+      "main": [
+        [
+          {
+            "node": "Para Cada Candidato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9a3789df-14da-414e-9e1a-e4c70329a91a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a1f59a7f650a8022c3e723ec7e37fbf37174036c99137138584aa21254bee2e2"
+  },
+  "id": "LM77FIH6UBQU9jsm",
+  "tags": []
+}
